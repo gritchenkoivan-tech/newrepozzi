@@ -1,178 +1,140 @@
-import random
+import json
+import csv
 import os
-import time
 
-STATS_DIR = "game_stats"
-STATS_FILE = os.path.join(STATS_DIR, "statistics.txt")
-
-def init_stats():
-    if not os.path.exists(STATS_DIR):
-        os.makedirs(STATS_DIR)
-    if not os.path.exists(STATS_FILE):
-        with open(STATS_FILE, 'w', encoding='utf-8') as f:
-            f.write("Статистика игр в крестики-нолики\n")
-            f.write("="*50 + "\n")
-
-def save_game_result(result, players, field_size):
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-    with open(STATS_FILE, 'a', encoding='utf-8') as f:
-        f.write(f"\nДата: {timestamp}\n")
-        f.write(f"Размер поля: {field_size}x{field_size}\n")
-        f.write(f"Игроки: {players}\n")
-        f.write(f"Результат: {result}\n")
-        f.write("-"*30 + "\n")
-
-def create_board(size):
-    return [[' ' for _ in range(size)] for _ in range(size)]
-
-def print_board(board):
-    size = len(board)
-    print("\n  " + " ".join(str(i) for i in range(size)))
-    for i in range(size):
-        print(f"{i} " + "|".join(board[i]))
-        if i < size - 1:
-            print("  " + "-"*(size*2-1))
-
-def check_win(board, player):
-    size = len(board)
+def task_1_block_5():
+    with open('animals.csv', 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Животное', 'Среда обитания'])
+        writer.writerow(['Медведь', 'Лес'])
+        writer.writerow(['Дельфин', 'Океан'])
+        writer.writerow(['Верблюд', 'Пустыня'])
     
-    for i in range(size):
-        if all(board[i][j] == player for j in range(size)):
-            return True
-        if all(board[j][i] == player for j in range(size)):
-            return True
+    animals_list = []
+    with open('animals.csv', 'r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            animals_list.append(row)
     
-    if all(board[i][i] == player for i in range(size)):
-        return True
-    if all(board[i][size-1-i] == player for i in range(size)):
-        return True
+    with open('zoo.json', 'w', encoding='utf-8') as file:
+        json.dump(animals_list, file, ensure_ascii=False, indent=4)
     
-    return False
+    print("Задача 5 из блока 1 выполнена")
 
-def check_draw(board):
-    return all(cell != ' ' for row in board for cell in row)
-
-def get_valid_move(board, player):
-    size = len(board)
-    while True:
-        try:
-            move = input(f"Игрок {player}, введите строку и столбец (например: 1 2): ").split()
-            if len(move) != 2:
-                print("Введите два числа через пробел!")
-                continue
-                
-            row, col = int(move[0]), int(move[1])
-            
-            if row < 0 or row >= size or col < 0 or col >= size:
-                print(f"Координаты должны быть от 0 до {size-1}!")
-                continue
-                
-            if board[row][col] != ' ':
-                print("Эта клетка уже занята!")
-                continue
-                
-            return row, col
-        except ValueError:
-            print("Введите числа корректно!")
-        except Exception:
-            print("Ошибка ввода!")
-
-def bot_move(board, player):
-    size = len(board)
-    empty_cells = [(i, j) for i in range(size) for j in range(size) if board[i][j] == ' ']
-    return random.choice(empty_cells) if empty_cells else (0, 0)
-
-def play_game(field_size, game_mode):
-    board = create_board(field_size)
-    players = ['X', 'O']
-    current_player_idx = random.randint(0, 1)
+def task_2_block_2():
+    test_data = [
+        ['Имя', 'Возраст', 'Город', 'Должность'],
+        ['Иван', '28', 'Москва', 'Разработчик'],
+        ['Мария', '35', 'Санкт-Петербург', 'Менеджер'],
+        ['Алексей', '42', 'Москва', 'Дизайнер'],
+        ['Ольга', '31', 'Казань', 'Разработчик'],
+        ['Дмитрий', '29', 'Москва', 'Менеджер']
+    ]
     
-    print(f"\nНачинаем игру на поле {field_size}x{field_size}!")
-    print(f"Первым ходит: {players[current_player_idx]}")
+    with open('csv_file.csv', 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerows(test_data)
     
-    while True:
-        print_board(board)
-        current_player = players[current_player_idx]
+    salary_map = {
+        'Разработчик': 120000,
+        'Менеджер': 100000,
+        'Дизайнер': 90000
+    }
+    
+    rows = []
+    with open('csv_file.csv', 'r', newline='', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        headers = next(reader)
+        headers.append('Зарплата')
+        rows.append(headers)
         
-        if game_mode == 'robot' and current_player == 'O':
-            print("\nХод бота...")
-            time.sleep(1)
-            row, col = bot_move(board, current_player)
-        else:
-            row, col = get_valid_move(board, current_player)
+        for row in reader:
+            if len(row) >= 4:
+                position = row[3]
+                salary = salary_map.get(position, 0)
+                row.append(str(salary))
+                rows.append(row)
+    
+    with open('employees_with_salary.csv', 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
+    
+    print("Задача 2 из блока 2 выполнена")
+
+def convert_csv_to_json(csv_path: str, json_path: str) -> None:
+    try:
+        data = []
+        with open(csv_path, 'r', newline='', encoding='utf-8') as csv_file:
+            reader = csv.DictReader(csv_file)
+            for row in reader:
+                data.append(row)
         
-        board[row][col] = current_player
+        with open(json_path, 'w', encoding='utf-8') as json_file:
+            json.dump(data, json_file, ensure_ascii=False, indent=4)
         
-        if check_win(board, current_player):
-            print_board(board)
-            result = f"Победил {current_player}!"
-            print(result)
-            
-            if game_mode == 'robot':
-                players_str = "Человек (X) vs Бот (O)"
-            else:
-                players_str = "Человек (X) vs Человек (O)"
-            
-            save_game_result(result, players_str, field_size)
-            return current_player
+        print(f"CSV {csv_path} -> JSON {json_path}")
+    
+    except FileNotFoundError:
+        print(f"Файл {csv_path} не найден")
+    except Exception as e:
+        print(f"Ошибка: {e}")
+
+def convert_json_to_csv(json_path: str, csv_path: str) -> None:
+    try:
+        with open(json_path, 'r', encoding='utf-8') as json_file:
+            data = json.load(json_file)
         
-        if check_draw(board):
-            print_board(board)
-            result = "Ничья!"
-            print(result)
-            
-            if game_mode == 'robot':
-                players_str = "Человек (X) vs Бот (O)"
-            else:
-                players_str = "Человек (X) vs Человек (O)"
-            
-            save_game_result(result, players_str, field_size)
-            return 'draw'
+        if not data:
+            print("JSON файл пуст")
+            return
         
-        current_player_idx = (current_player_idx + 1) % 2
+        headers = list(data[0].keys())
+        
+        with open(csv_path, 'w', newline='', encoding='utf-8') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=headers)
+            writer.writeheader()
+            writer.writerows(data)
+        
+        print(f"JSON {json_path} -> CSV {csv_path}")
+    
+    except FileNotFoundError:
+        print(f"Файл {json_path} не найден")
+    except Exception as e:
+        print(f"Ошибка: {e}")
 
 def main():
-    init_stats()
+    print("=" * 50)
+    print("5 ВАРИАНТ")
+    print("=" * 50)
     
-    while True:
-        print("\n" + "="*50)
-        print("КРЕСТИКИ-НОЛИКИ")
-        print("="*50)
-        
-        try:
-            field_size = int(input("Введите размер игрового поля (например, 3): "))
-            if field_size < 3:
-                print("Минимальный размер поля - 3!")
-                continue
-                
-            print("\nВыберите режим игры:")
-            print("1. Два игрока")
-            print("2. Против бота")
-            mode_choice = input("Ваш выбор (1 или 2): ")
-            
-            if mode_choice == '1':
-                game_mode = 'human'
-            elif mode_choice == '2':
-                game_mode = 'robot'
-            else:
-                print("Неверный выбор, играем с человеком")
-                game_mode = 'human'
-            
-            play_game(field_size, game_mode)
-            
-            print("\n" + "="*30)
-            restart = input("Хотите сыграть еще раз? (да/нет): ").lower()
-            if restart != 'да':
-                print("Спасибо за игру! Статистика сохранена в папке game_stats")
-                break
-                
-        except ValueError:
-            print("Ошибка! Введите число для размера поля.")
-        except KeyboardInterrupt:
-            print("\n\nИгра прервана.")
-            break
-        except Exception:
-            print("Произошла ошибка!")
+    task_1_block_5()
+    print()
+    
+    task_2_block_2()
+    print()
+    
+    print("Преобразования:")
+    print("-" * 40)
+    
+    convert_csv_to_json('animals.csv', 'animals_converted.json')
+    convert_json_to_csv('zoo.json', 'zoo_converted.csv')
+    convert_csv_to_json('employees_with_salary.csv', 'employees.json')
+    
+    print("\n" + "=" * 50)
+    print("СОЗДАННЫЕ ФАЙЛЫ:")
+    print("=" * 50)
+    
+    files = [
+        'animals.csv', 'zoo.json', 'csv_file.csv',
+        'employees_with_salary.csv', 'animals_converted.json',
+        'zoo_converted.csv', 'employees.json'
+    ]
+    
+    for file in files:
+        if os.path.exists(file):
+            print(f"{file} - {os.path.getsize(file)} байт")
+        else:
+            print(f"{file} - не найден")
 
 if __name__ == "__main__":
     main()
